@@ -1,0 +1,62 @@
+﻿@model Projet.Models.Offre
+@{
+    ViewData["Title"] = "Créer une offre";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0 fw-bold text-primary">✨ Nouvelle Offre</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Titre" class="form-control" placeholder="Titre" />
+                                    <label asp-for="Titre">Titre de l'annonce</label>
+                                    <span asp-validation-for="Titre" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="PosteId" class="form-select" asp-items="ViewBag.PosteId"></select>
+                                    <label asp-for="PosteId">Métier (Poste)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <div class="form-floating">
+                                    <input asp-for="VilleCible" class="form-control" placeholder="Ville" />
+                                    <label asp-for="VilleCible">Ville</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="CodePostalCible" class="form-control" placeholder="CP" />
+                                    <label asp-for="CodePostalCible">Code Postal</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Description" class="form-control" style="height: 150px" placeholder="Desc"></textarea>
+                            <label asp-for="Description">Description du poste</label>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-light border">Annuler</a>
+                            <button type="submit" class="btn btn-primary-gradient px-4">Créer l'offre</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

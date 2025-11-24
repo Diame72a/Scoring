@@ -1,0 +1,106 @@
+﻿@model Projet.Models.Personne
+@{
+    ViewData["Title"] = "Profil Candidat";
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Candidats</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Prenom @Model.Nom</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow border-0 text-center h-100">
+                <div class="card-body p-5">
+                    <div class="mx-auto bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mb-4 shadow-sm"
+                         style="width: 120px; height: 120px; font-size: 3rem; font-weight: bold; border: 4px solid white;">
+                        @Model.Prenom.Substring(0, 1)@Model.Nom.Substring(0, 1)
+                    </div>
+
+                    <h3 class="fw-bold mb-1">@Model.Prenom @Model.Nom</h3>
+
+                    <div class="mb-4">
+                        @if (Model.AnneesExperienceTotal >= 5)
+                        {
+                            <span class="badge bg-warning text-dark rounded-pill px-3">SENIOR EXPERT</span>
+                        }
+                        else if (Model.AnneesExperienceTotal >= 2)
+                        {
+
+                            <span class="badge bg-info text-white rounded-pill px-3">CONFIRMÉ</span>
+                        }
+                        else
+                        {
+
+                            <span class="badge bg-secondary rounded-pill px-3">JUNIOR</span>
+                        }
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="mailto:@Model.Email" class="btn btn-primary-gradient shadow-sm"><i class="far fa-envelope me-2"></i>Contacter</a>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Modifier profil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white fw-bold py-3">Informations détaillées</div>
+                <div class="card-body p-4">
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-map-marker-alt fa-lg"></i></div>
+                                <div>
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Localisation</small>
+                                    <span class="fw-bold">@Model.Ville (@Model.CodePostal)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-birthday-cake fa-lg"></i></div>
+                                <div>
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Âge</small>
+                                    <span class="fw-bold">@(DateTime.Now.Year - Model.DateNaissance.Year) ans</span>
+                                    <span class="text-muted small">(@Model.DateNaissance.ToShortDateString())</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-chart-line fa-lg"></i></div>
+                                <div>
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Expérience Totale</small>
+                                    <span class="fw-bold">@Model.AnneesExperienceTotal ans</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-at fa-lg"></i></div>
+                                <div>
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Email</small>
+                                    <span class="fw-bold text-break">@Model.Email</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted text-uppercase fw-bold small border-bottom pb-2 mb-3">Compétences Techniques</h6>
+                    <div class="p-4 bg-light rounded text-center text-muted border border-dashed">
+                        <i class="fas fa-code fa-2x mb-2 text-secondary opacity-50"></i>
+                        <p class="mb-0 small">Les compétences n'ont pas encore été associées à ce profil.</p>
+                        <a href="#" class="small text-primary fw-bold text-decoration-none">Gérer les compétences</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
