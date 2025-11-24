@@ -19,22 +19,45 @@ namespace Projet.Controllers
         }
 
         // GET: Offres
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, int? posteId)
         {
-            // 1. Récupérer les offres avec le Poste inclus (pour l'affichage)
-            var offres = _context.Offres.Include(o => o.Poste);
+            
+            var query = _context.Offres.Include(o => o.Poste).AsQueryable();
 
-            // 2. Préparer les données pour le Graphique (Offres par Ville)
-            var statsVilles = await _context.Offres
+            
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(o => o.Titre.Contains(searchString) || o.VilleCible.Contains(searchString));
+            }
+
+            
+            if (posteId.HasValue)
+            {
+                query = query.Where(o => o.PosteId == posteId);
+            }
+
+            
+            var offres = await query.OrderByDescending(o => o.DateCreation).ToListAsync();
+
+            
+
+            
+            ViewBag.Postes = await _context.Postes.OrderBy(p => p.Intitule).ToListAsync();
+
+            
+            var statsVilles = offres
                 .GroupBy(o => o.VilleCible)
                 .Select(g => new { Ville = g.Key, Nombre = g.Count() })
-                .ToListAsync();
+                .ToList();
 
-            // On passe ça à la vue via ViewBag (c'est rapide pour les CRUD)
             ViewBag.VillesLabels = statsVilles.Select(s => s.Ville).ToList();
             ViewBag.VillesData = statsVilles.Select(s => s.Nombre).ToList();
 
-            return View(await offres.ToListAsync());
+            
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentPoste"] = posteId;
+
+            return View(offres);
         }
 
         // GET: Offres/Details/5

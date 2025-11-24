@@ -19,26 +19,44 @@ namespace Projet.Controllers
         }
 
         // GET: Competences
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string sortOrder)
         {
             
-            var competences = await _context.Competences.ToListAsync();
+            var query = _context.Competences.AsQueryable();
+
+            
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(c => c.Nom.Contains(searchString));
+            }
+
+            
+            ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    query = query.OrderByDescending(c => c.Nom);
+                    break;
+                default:
+                    query = query.OrderBy(c => c.Nom);
+                    break;
+            }
+
+            var competences = await query.ToListAsync();
 
             
             var topCompetences = await _context.CompetenceSouhaitees
                 .Include(cs => cs.Competence)
                 .GroupBy(cs => cs.Competence.Nom)
-                .Select(group => new {
-                    Nom = group.Key,
-                    Nombre = group.Count()
-                })
-                .OrderByDescending(x => x.Nombre) 
-                .Take(5) 
-                .ToListAsync();
+                .Select(g => new { Nom = g.Key, Nombre = g.Count() })
+                .OrderByDescending(x => x.Nombre).Take(5).ToListAsync();
 
-            
             ViewBag.TopLabels = topCompetences.Select(x => x.Nom).ToList();
             ViewBag.TopData = topCompetences.Select(x => x.Nombre).ToList();
+
+            
+            ViewData["CurrentFilter"] = searchString;
 
             return View(competences);
         }

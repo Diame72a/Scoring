@@ -15,23 +15,43 @@ namespace Projet.Controllers
             _context = context;
         }
 
-        // GET: Postes
-        public async Task<IActionResult> Index()
+        
+        public async Task<IActionResult> Index(string searchString)
         {
-            // 1. Récupérer la liste des postes
-            var postes = await _context.Postes.ToListAsync();
+            
+            var query = _context.Postes.AsQueryable();
 
-            // 2. STATS POUR LE GRAPHIQUE : Top 5 des métiers avec le plus d'offres
-            // On interroge la table Offre pour compter
-            var stats = await _context.Offres
+            
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(p => p.Intitule.Contains(searchString));
+            }
+
+            
+            var postes = await query.OrderBy(p => p.Intitule).ToListAsync();
+
+            
+            var topPostes = await _context.Offres
+                .Include(o => o.Poste)
                 .GroupBy(o => o.Poste.Intitule)
-                .Select(g => new { Metier = g.Key, NbOffres = g.Count() })
-                .OrderByDescending(x => x.NbOffres)
+                .Select(g => new { Nom = g.Key, Nombre = g.Count() })
+                .OrderByDescending(x => x.Nombre)
                 .Take(5)
                 .ToListAsync();
 
-            ViewBag.Labels = stats.Select(x => x.Metier).ToList();
-            ViewBag.Data = stats.Select(x => x.NbOffres).ToList();
+            // Si pas de données (ex: au début), on évite le bug du graph vide
+            if (!topPostes.Any())
+            {
+                ViewBag.Labels = new List<string>();
+                ViewBag.Data = new List<int>();
+            }
+            else
+            {
+                ViewBag.Labels = topPostes.Select(x => x.Nom).ToList();
+                ViewBag.Data = topPostes.Select(x => x.Nombre).ToList();
+            }
+
+            ViewData["CurrentFilter"] = searchString;
 
             return View(postes);
         }

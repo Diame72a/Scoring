@@ -19,22 +19,54 @@ namespace Projet.Controllers
         }
 
         // GET: Personnes
-        public async Task<IActionResult> Index()
+        
+        public async Task<IActionResult> Index(string searchString, string villeFilter)
         {
-            var personnes = await _context.Personnes.ToListAsync();
+            
+            var query = _context.Personnes.AsQueryable();
 
             
-            int junior = personnes.Count(p => p.AnneesExperienceTotal < 2);
-            int confirme = personnes.Count(p => p.AnneesExperienceTotal >= 2 && p.AnneesExperienceTotal < 5);
-            int senior = personnes.Count(p => p.AnneesExperienceTotal >= 5);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                
+                query = query.Where(p => p.Nom.Contains(searchString)
+                                      || p.Prenom.Contains(searchString)
+                                      || p.Email.Contains(searchString));
+            }
 
-            ViewBag.ExpLabels = new List<string> { "Junior (<2 ans)", "Confirmé (2-5 ans)", "Senior (5+ ans)" };
+            
+            if (!string.IsNullOrEmpty(villeFilter))
+            {
+                query = query.Where(p => p.Ville == villeFilter);
+            }
+
+            
+            var candidats = await query.ToListAsync();
+
+            
+
+            
+            ViewBag.VillesDisponibles = await _context.Personnes
+                                                .Select(p => p.Ville)
+                                                .Distinct()
+                                                .ToListAsync();
+
+            
+            int junior = candidats.Count(p => p.AnneesExperienceTotal < 2);
+            int confirme = candidats.Count(p => p.AnneesExperienceTotal >= 2 && p.AnneesExperienceTotal < 5);
+            int senior = candidats.Count(p => p.AnneesExperienceTotal >= 5);
+
+            ViewBag.ExpLabels = new List<string> { "Junior", "Confirmé", "Senior" };
             ViewBag.ExpData = new List<int> { junior, confirme, senior };
 
-            return View(personnes);
+            
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentVille"] = villeFilter;
+
+            return View(candidats);
         }
 
-        
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
