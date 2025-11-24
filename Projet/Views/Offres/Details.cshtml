@@ -1,4 +1,5 @@
-﻿@model Projet.Models.Offre
+﻿@using System.Linq
+@model Projet.Models.Offre
 
 @{
     ViewData["Title"] = "Détails de l'offre";
@@ -18,24 +19,71 @@
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body p-5">
                     <div class="d-flex justify-content-between align-items-start mb-4">
-                        <h1 class="fw-bold text-dark mb-0">@Model.Titre</h1>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Actif</span>
+                        <div>
+                            <h2 class="fw-bold text-dark mb-1">@Model.Titre</h2>
+                            <span class="badge bg-light text-dark border fw-normal">
+                                <i class="fas fa-briefcase me-1"></i> @Model.Poste?.Intitule
+                            </span>
+                        </div>
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <span class="fw-bold fs-4">@Model.Titre.Substring(0, 1)</span>
+                        </div>
                     </div>
 
                     <h5 class="text-muted text-uppercase small fw-bold mb-3"><i class="fas fa-align-left me-2"></i>Description du poste</h5>
-
-                    <p class="text-secondary lh-lg" style="white-space: pre-line;">
+                    <p class="text-secondary lh-lg mb-5" style="white-space: pre-line;">
                         @Model.Description
                     </p>
+
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+                        <h6 class="text-primary fw-bold mb-0"><i class="fas fa-tasks me-2"></i>Compétences Requises</h6>
+                    </div>
+
+                    @if (Model.CompetenceSouhaitees != null && Model.CompetenceSouhaitees.Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var item in ((IEnumerable<Projet.Models.CompetenceSouhaitee>)Model.CompetenceSouhaitees).OrderByDescending(x => x.NiveauRequis))
+                            {
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light border-0 rounded-3 position-relative">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold text-dark">@item.Competence?.Nom</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                @{
+                                                    var w = item.NiveauRequis * 20;
+                                                    var c = item.NiveauRequis >= 4 ? "bg-danger" : (item.NiveauRequis >= 3 ? "bg-warning" : "bg-info");
+                                                }
+                                                <div class="progress-bar @c" role="progressbar" style="width: @w%"></div>
+                                            </div>
+                                            <span class="small fw-bold text-muted">Niveau @item.NiveauRequis</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning border-0 small d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle me-2 fa-lg"></i>
+                            <div>
+                                <strong>Attention :</strong> Aucune compétence n'est requise pour ce poste.
+                                <br>L'algorithme de scoring ne pourra pas filtrer techniquement les candidats.
+                            </div>
+                        </div>
+                    }
+
                 </div>
                 <div class="card-footer bg-white border-0 p-4 pt-0">
                     <hr class="text-muted opacity-25 mb-4">
                     <div class="d-flex gap-2">
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary-gradient">
-                            <i class="fas fa-pen me-2"></i>Modifier
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-light border text-muted fw-bold">
+                            <i class="fas fa-pen me-2"></i>Modifier l'offre
                         </a>
-                        <a asp-controller="Scoring" asp-action="Calculer" asp-route-id="@Model.Id" class="btn btn-outline-primary border-2 fw-bold">
-                            <i class="fas fa-magic me-2"></i>Lancer un Matching
+                        <a asp-controller="Scoring" asp-action="Calculer" asp-route-id="@Model.Id" class="btn btn-primary-gradient px-4 shadow-sm">
+                            <i class="fas fa-magic me-2"></i>Lancer le Matching
                         </a>
                     </div>
                 </div>
@@ -44,37 +92,75 @@
 
         <div class="col-lg-4">
             <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white fw-bold py-3">Informations Clés</div>
+                <div class="card-header bg-white fw-bold py-3">Critères Clés</div>
                 <div class="list-group list-group-flush">
                     <div class="list-group-item px-4 py-3 border-0">
-                        <small class="text-muted d-block mb-1">Métier de référence</small>
-                        <span class="fw-bold text-dark"><i class="fas fa-tag me-2 text-primary"></i>@Model.Poste?.Intitule</span>
-                    </div>
-                    <div class="list-group-item px-4 py-3 border-0 bg-light">
-                        <small class="text-muted d-block mb-1">Localisation</small>
+                        <small class="text-muted d-block mb-1">Localisation cible</small>
                         <span class="fw-bold text-dark"><i class="fas fa-map-marker-alt me-2 text-danger"></i>@Model.VilleCible (@Model.CodePostalCible)</span>
                     </div>
-                    <div class="list-group-item px-4 py-3 border-0">
+                    <div class="list-group-item px-4 py-3 border-0 bg-light">
                         <small class="text-muted d-block mb-1">Date de publication</small>
-                        <span class="fw-bold text-dark">
-                            <i class="far fa-calendar-alt me-2 text-info"></i>
-                            @(Model.DateCreation.HasValue? Model.DateCreation.Value.ToString("dd MMMM yyyy") : "Date inconnue")
-                        </span>
+                        <span class="fw-bold text-dark"><i class="far fa-calendar-alt me-2 text-info"></i>@(Model.DateCreation?.ToString("dd MMMM yyyy") ?? "N/A")</span>
                     </div>
                     <div class="list-group-item px-4 py-3 border-0">
-                        <small class="text-muted d-block mb-1">Référence interne</small>
-                        <span class="font-monospace text-secondary">REF-@Model.Id.ToString("D6")</span>
+                        <small class="text-muted d-block mb-1">Pondération actuelle</small>
+                        <div class="d-flex justify-content-between small mt-2">
+                            <span>Technique :</span> <span class="fw-bold">@(Model.ParametreScoring?.PoidsCompetences ?? 60)%</span>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span>Expérience :</span> <span class="fw-bold">@(Model.ParametreScoring?.PoidsExperience ?? 20)%</span>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span>Localisation :</span> <span class="fw-bold">@(Model.ParametreScoring?.PoidsLocalisation ?? 20)%</span>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <div class="card border-danger border-opacity-25 bg-danger bg-opacity-10 shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Zone Danger</h6>
-                    <p class="small text-muted mb-3">Une fois supprimée, cette offre ne pourra plus être récupérée.</p>
-                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-danger w-100">Supprimer l'offre</a>
-                </div>
+<div class="modal fade" id="modalAddSkill" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header text-white border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2"></i>Ajouter une exigence</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            <form asp-action="AjouterCompetence" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="offreId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Compétence</label>
+                        <select name="competenceId" class="form-select form-select-lg bg-light border-0">
+                            @if (ViewBag.CompetencesDispos != null)
+                            {
+                                foreach (var c in (IEnumerable<Projet.Models.Competence>)ViewBag.CompetencesDispos)
+                                {
+                                    <option value="@c.Id">@c.Nom</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Niveau Requis</label>
+                        <select name="niveau" class="form-select bg-light border-0">
+                            <option value="1">1 - Débutant (Nice to have)</option>
+                            <option value="2">2 - Intermédiaire</option>
+                            <option value="3">3 - Confirmé (Standard)</option>
+                            <option value="4">4 - Avancé (Important)</option>
+                            <option value="5">5 - Expert (Critique)</option>
+                        </select>
+                        <div class="form-text small">Plus le niveau est élevé, plus l'impact sur le score sera fort.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary-gradient px-4 rounded-pill fw-bold">Ajouter</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

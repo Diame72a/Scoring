@@ -1,64 +1,108 @@
 ﻿@model Projet.Models.Personne
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Modifier le profil";
 }
 
-<h1>Edit</h1>
+<div class="container-fluid py-4">
 
-<h4>Personne</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nom" class="control-label"></label>
-                <input asp-for="Nom" class="form-control" />
-                <span asp-validation-for="Nom" class="text-danger"></span>
+    <div class="d-flex justify-content-between align-items-center mb-4 mx-auto" style="max-width: 1000px;">
+        <div class="d-flex align-items-center">
+            <div class="rounded p-2 me-3 shadow-sm text-white bg-warning"
+                 style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);">
+                <i class="fas fa-user-edit fa-lg"></i>
             </div>
-            <div class="form-group">
-                <label asp-for="Prenom" class="control-label"></label>
-                <input asp-for="Prenom" class="form-control" />
-                <span asp-validation-for="Prenom" class="text-danger"></span>
+            <div>
+                <h4 class="fw-bold mb-0 text-dark">Éditer le profil</h4>
+                <small class="text-muted">Modification des informations de @Model.Prenom @Model.Nom</small>
             </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <a asp-action="Index" class="btn btn-light border text-muted shadow-sm btn-sm px-4 rounded-pill">
+            <i class="fas fa-times me-2"></i>Annuler
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+                <form asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="card-body p-5">
+                        <div class="row g-5">
+
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-muted text-uppercase small mb-4 border-bottom pb-2">
+                                    <i class="fas fa-id-card me-2 text-warning"></i>Identité
+                                </h6>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label asp-for="Prenom" class="form-label small fw-bold text-muted">Prénom</label>
+                                        <input asp-for="Prenom" class="form-control bg-light border-0 px-3 py-2" />
+                                        <span asp-validation-for="Prenom" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Nom" class="form-label small fw-bold text-muted">Nom</label>
+                                        <input asp-for="Nom" class="form-control bg-light border-0 px-3 py-2" />
+                                        <span asp-validation-for="Nom" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label asp-for="Email" class="form-label small fw-bold text-muted">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="far fa-envelope"></i></span>
+                                        <input asp-for="Email" class="form-control bg-light border-0 py-2" />
+                                    </div>
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="DateNaissance" class="form-label small fw-bold text-muted">Date de Naissance</label>
+                                    <input asp-for="DateNaissance" type="date" class="form-control bg-light border-0 px-3 py-2" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 border-start-lg pl-lg-5">
+                                <h6 class="fw-bold text-muted text-uppercase small mb-4 border-bottom pb-2">
+                                    <i class="fas fa-globe-europe me-2 text-info"></i>Localisation & Info
+                                </h6>
+
+                                <div class="mb-4">
+                                    <label asp-for="Ville" class="form-label small fw-bold text-muted">Ville</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="fas fa-map-marker-alt small"></i></span>
+                                        <input asp-for="Ville" class="form-control bg-light border-0 py-2" />
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label asp-for="AnneesExperienceTotal" class="form-label small fw-bold text-muted">Années d'expérience</label>
+                                    <div class="d-flex align-items-center bg-light rounded px-3 py-2">
+                                        <i class="fas fa-chart-line text-muted me-3"></i>
+                                        <input asp-for="AnneesExperienceTotal" type="number" min="0" class="form-control border-0 bg-transparent fw-bold text-dark" />
+                                        <span class="text-muted small text-uppercase fw-bold ms-2">Ans</span>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-light border small text-muted mt-4">
+                                    <i class="fas fa-info-circle me-2 text-primary"></i>
+                                    Pour modifier les compétences techniques, veuillez passer par la fiche détail du candidat.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white p-4 border-top text-end">
+                        <button type="submit" class="btn text-white fw-bold rounded-pill px-5 py-2 shadow-sm"
+                                style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); border:none;">
+                            <i class="fas fa-save me-2"></i>Enregistrer
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="DateNaissance" class="control-label"></label>
-                <input asp-for="DateNaissance" class="form-control" />
-                <span asp-validation-for="DateNaissance" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Ville" class="control-label"></label>
-                <input asp-for="Ville" class="form-control" />
-                <span asp-validation-for="Ville" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CodePostal" class="control-label"></label>
-                <input asp-for="CodePostal" class="form-control" />
-                <span asp-validation-for="CodePostal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AnneesExperienceTotal" class="control-label"></label>
-                <input asp-for="AnneesExperienceTotal" class="form-control" />
-                <span asp-validation-for="AnneesExperienceTotal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

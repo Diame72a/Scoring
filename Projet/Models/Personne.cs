@@ -11,6 +11,8 @@ public partial class Personne
 
     public string Prenom { get; set; } = null!;
 
+    public string? Telephone { get; set; }
+
     public string Email { get; set; } = null!;
 
     public DateOnly DateNaissance { get; set; }
