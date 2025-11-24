@@ -1,9 +1,12 @@
-﻿@model Projet.Models.Personne
+﻿@using System.Linq
+@model Projet.Models.Personne
+
 @{
     ViewData["Title"] = "Profil Candidat";
 }
 
 <div class="container py-5">
+    <!-- Fil d'ariane -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Candidats</a></li>
@@ -12,9 +15,11 @@
     </nav>
 
     <div class="row g-4">
+        <!-- COLONNE GAUCHE : IDENTITÉ (Design Pro) -->
         <div class="col-lg-4">
             <div class="card shadow border-0 text-center h-100">
                 <div class="card-body p-5">
+                    <!-- Avatar -->
                     <div class="mx-auto bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mb-4 shadow-sm"
                          style="width: 120px; height: 120px; font-size: 3rem; font-weight: bold; border: 4px solid white;">
                         @Model.Prenom.Substring(0, 1)@Model.Nom.Substring(0, 1)
@@ -22,6 +27,7 @@
 
                     <h3 class="fw-bold mb-1">@Model.Prenom @Model.Nom</h3>
 
+                    <!-- Badge Niveau Expérience -->
                     <div class="mb-4">
                         @if (Model.AnneesExperienceTotal >= 5)
                         {
@@ -29,16 +35,15 @@
                         }
                         else if (Model.AnneesExperienceTotal >= 2)
                         {
-
                             <span class="badge bg-info text-white rounded-pill px-3">CONFIRMÉ</span>
                         }
                         else
                         {
-
                             <span class="badge bg-secondary rounded-pill px-3">JUNIOR</span>
                         }
                     </div>
 
+                    <!-- Actions -->
                     <div class="d-grid gap-2">
                         <a href="mailto:@Model.Email" class="btn btn-primary-gradient shadow-sm"><i class="far fa-envelope me-2"></i>Contacter</a>
                         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Modifier profil</a>
@@ -47,11 +52,13 @@
             </div>
         </div>
 
+        <!-- COLONNE DROITE : DÉTAILS & COMPÉTENCES -->
         <div class="col-lg-8">
             <div class="card shadow border-0 h-100">
                 <div class="card-header bg-white fw-bold py-3">Informations détaillées</div>
                 <div class="card-body p-4">
 
+                    <!-- BLOC INFOS GÉNÉRALES -->
                     <div class="row g-4 mb-5">
                         <div class="col-md-6">
                             <div class="d-flex align-items-center">
@@ -92,15 +99,109 @@
                         </div>
                     </div>
 
-                    <h6 class="text-muted text-uppercase fw-bold small border-bottom pb-2 mb-3">Compétences Techniques</h6>
-                    <div class="p-4 bg-light rounded text-center text-muted border border-dashed">
-                        <i class="fas fa-code fa-2x mb-2 text-secondary opacity-50"></i>
-                        <p class="mb-0 small">Les compétences n'ont pas encore été associées à ce profil.</p>
-                        <a href="#" class="small text-primary fw-bold text-decoration-none">Gérer les compétences</a>
+                    <!-- BLOC COMPÉTENCES DYNAMIQUE -->
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                        <h6 class="text-muted text-uppercase fw-bold small mb-0">Compétences Techniques</h6>
+                        <!-- Bouton déclencheur de la modale -->
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold shadow-sm border" data-bs-toggle="modal" data-bs-target="#modalAddSkill">
+                            <i class="fas fa-plus-circle me-1"></i> Ajouter
+                        </button>
                     </div>
+
+                    @if (Model.CompetenceAcquises != null && Model.CompetenceAcquises.Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var item in ((IEnumerable<Projet.Models.CompetenceAcquise>)Model.CompetenceAcquises).OrderByDescending(x => x.Niveau))
+                            {
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-white border rounded shadow-sm position-relative">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold text-dark">@item.Competence?.Nom</span>
+
+                                            <!-- Bouton Supprimer -->
+                                            <form asp-action="SupprimerCompetence" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="btn btn-link text-danger p-0 small" title="Retirer" onclick="return confirm('Retirer cette compétence ?');">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <!-- Jauge de Niveau -->
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                @{
+                                                    var width = item.Niveau * 20;
+                                                    var color = item.Niveau >= 4 ? "bg-success" : (item.Niveau >= 3 ? "bg-info" : "bg-warning");
+                                                }
+                                                <div class="progress-bar @color" role="progressbar" style="width: @width%"></div>
+                                            </div>
+                                            <span class="small fw-bold text-muted">@item.Niveau/5</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- État vide -->
+                        <div class="p-4 bg-light rounded text-center text-muted border border-dashed">
+                            <i class="fas fa-code fa-2x mb-2 text-secondary opacity-50"></i>
+                            <p class="mb-0 small">Aucune compétence associée à ce profil.</p>
+                            <button class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalAddSkill">En ajouter une maintenant</button>
+                        </div>
+                    }
 
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- --- MODALE D'AJOUT DE COMPÉTENCE --- -->
+<div class="modal fade" id="modalAddSkill" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-plus me-2"></i>Nouvelle Compétence</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form asp-action="AjouterCompetence" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="personneId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase">Compétence</label>
+                        <select name="competenceId" class="form-select form-select-lg">
+                            @if (ViewBag.CompetencesDispos != null)
+                            {
+                                foreach (var c in (IEnumerable<Projet.Models.Competence>)ViewBag.CompetencesDispos)
+                                {
+                                    <option value="@c.Id">@c.Nom</option>
+                                }
+                            }
+                        </select>
+                        <div class="form-text">Liste issue du catalogue global.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase">Niveau de maîtrise</label>
+                        <select name="niveau" class="form-select">
+                            <option value="1">1 - Débutant (Notions)</option>
+                            <option value="2">2 - Intermédiaire (Autonome)</option>
+                            <option value="3">3 - Confirmé (Opérationnel)</option>
+                            <option value="4">4 - Avancé (Maîtrise)</option>
+                            <option value="5">5 - Expert (Référence)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4">Ajouter</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

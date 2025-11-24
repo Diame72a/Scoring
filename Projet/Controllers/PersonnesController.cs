@@ -23,7 +23,7 @@ namespace Projet.Controllers
         {
             var personnes = await _context.Personnes.ToListAsync();
 
-            // Stats pour le graphique : Répartition par niveau d'expérience
+            
             int junior = personnes.Count(p => p.AnneesExperienceTotal < 2);
             int confirme = personnes.Count(p => p.AnneesExperienceTotal >= 2 && p.AnneesExperienceTotal < 5);
             int senior = personnes.Count(p => p.AnneesExperienceTotal >= 5);
@@ -34,22 +34,64 @@ namespace Projet.Controllers
             return View(personnes);
         }
 
-        // GET: Personnes/Details/5
+        
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
+            
             var personne = await _context.Personnes
+                .Include(p => p.CompetenceAcquises)
+                    .ThenInclude(ca => ca.Competence) 
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (personne == null)
-            {
-                return NotFound();
-            }
+
+            if (personne == null) return NotFound();
+
+            
+            ViewBag.CompetencesDispos = _context.Competences.OrderBy(c => c.Nom).ToList();
 
             return View(personne);
+        }
+
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AjouterCompetence(int personneId, int competenceId, int niveau)
+        {
+            
+            var existeDeja = await _context.CompetenceAcquises
+                .AnyAsync(ca => ca.PersonneId == personneId && ca.CompetenceId == competenceId);
+
+            if (!existeDeja)
+            {
+                var nouvelleComp = new CompetenceAcquise
+                {
+                    PersonneId = personneId,
+                    CompetenceId = competenceId,
+                    Niveau = niveau
+                };
+                _context.Add(nouvelleComp);
+                await _context.SaveChangesAsync();
+            }
+
+            
+            return RedirectToAction(nameof(Details), new { id = personneId });
+        }
+
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SupprimerCompetence(int id)
+        {
+            var compAcquise = await _context.CompetenceAcquises.FindAsync(id);
+            if (compAcquise != null)
+            {
+                int personneId = compAcquise.PersonneId; // On garde l'ID pour la redirection
+                _context.CompetenceAcquises.Remove(compAcquise);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Details), new { id = personneId });
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Personnes/Create
