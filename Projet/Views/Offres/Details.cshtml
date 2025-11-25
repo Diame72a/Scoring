@@ -5,6 +5,9 @@
     ViewData["Title"] = "Détails de l'offre";
 }
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <div class="container py-5">
 
     <nav aria-label="breadcrumb" class="mb-4">
@@ -16,7 +19,7 @@
 
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100 rounded-4">
                 <div class="card-body p-5">
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
@@ -25,8 +28,9 @@
                                 <i class="fas fa-briefcase me-1"></i> @Model.Poste?.Intitule
                             </span>
                         </div>
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                            <span class="fw-bold fs-4">@Model.Titre.Substring(0, 1)</span>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm fw-bold"
+                             style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-size: 1.5rem;">
+                            @Model.Titre.Substring(0, 1)
                         </div>
                     </div>
 
@@ -68,10 +72,7 @@
                     {
                         <div class="alert alert-warning border-0 small d-flex align-items-center">
                             <i class="fas fa-exclamation-circle me-2 fa-lg"></i>
-                            <div>
-                                <strong>Attention :</strong> Aucune compétence n'est requise pour ce poste.
-                                <br>L'algorithme de scoring ne pourra pas filtrer techniquement les candidats.
-                            </div>
+                            <div>Aucune compétence requise définie.</div>
                         </div>
                     }
 
@@ -79,10 +80,10 @@
                 <div class="card-footer bg-white border-0 p-4 pt-0">
                     <hr class="text-muted opacity-25 mb-4">
                     <div class="d-flex gap-2">
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-light border text-muted fw-bold">
-                            <i class="fas fa-pen me-2"></i>Modifier l'offre
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-light border text-muted fw-bold rounded-pill px-4">
+                            <i class="fas fa-pen me-2"></i>Modifier
                         </a>
-                        <a asp-controller="Scoring" asp-action="Calculer" asp-route-id="@Model.Id" class="btn btn-primary-gradient px-4 shadow-sm">
+                        <a asp-controller="Scoring" asp-action="Calculer" asp-route-id="@Model.Id" class="btn btn-primary-gradient px-4 shadow-sm rounded-pill fw-bold">
                             <i class="fas fa-magic me-2"></i>Lancer le Matching
                         </a>
                     </div>
@@ -91,8 +92,9 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white fw-bold py-3">Critères Clés</div>
+
+            <div class="card shadow-sm border-0 mb-4 rounded-4">
+                <div class="card-header bg-white fw-bold py-3 rounded-top-4">Critères Clés</div>
                 <div class="list-group list-group-flush">
                     <div class="list-group-item px-4 py-3 border-0">
                         <small class="text-muted d-block mb-1">Localisation cible</small>
@@ -102,65 +104,53 @@
                         <small class="text-muted d-block mb-1">Date de publication</small>
                         <span class="fw-bold text-dark"><i class="far fa-calendar-alt me-2 text-info"></i>@(Model.DateCreation?.ToString("dd MMMM yyyy") ?? "N/A")</span>
                     </div>
-                    <div class="list-group-item px-4 py-3 border-0">
-                        <small class="text-muted d-block mb-1">Pondération actuelle</small>
-                        <div class="d-flex justify-content-between small mt-2">
-                            <span>Technique :</span> <span class="fw-bold">@(Model.ParametreScoring?.PoidsCompetences ?? 60)%</span>
-                        </div>
-                        <div class="d-flex justify-content-between small">
-                            <span>Expérience :</span> <span class="fw-bold">@(Model.ParametreScoring?.PoidsExperience ?? 20)%</span>
-                        </div>
-                        <div class="d-flex justify-content-between small">
-                            <span>Localisation :</span> <span class="fw-bold">@(Model.ParametreScoring?.PoidsLocalisation ?? 20)%</span>
-                        </div>
-                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4 overflow-hidden rounded-4">
+                <div class="card-header bg-white fw-bold py-3 border-bottom">
+                    <i class="fas fa-map me-2 text-primary"></i>Situation Géographique
+                </div>
+                <div id="map" style="height: 250px; width: 100%;"></div>
+            </div>
+
+            <div class="card border-danger border-opacity-25 bg-danger bg-opacity-10 shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h6 class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Zone Danger</h6>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-danger w-100 mt-2">Supprimer l'offre</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalAddSkill" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header text-white border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2"></i>Ajouter une exigence</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form asp-action="AjouterCompetence" method="post">
-                <div class="modal-body p-4">
-                    <input type="hidden" name="offreId" value="@Model.Id" />
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var ville = "@Html.Raw(Model.VilleCible)";
+        var cp = "@Html.Raw(Model.CodePostalCible)";
+        var query = ville + " " + cp + " France"; // On précise France pour aider l'API
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Compétence</label>
-                        <select name="competenceId" class="form-select form-select-lg bg-light border-0">
-                            @if (ViewBag.CompetencesDispos != null)
-                            {
-                                foreach (var c in (IEnumerable<Projet.Models.Competence>)ViewBag.CompetencesDispos)
-                                {
-                                    <option value="@c.Id">@c.Nom</option>
-                                }
-                            }
-                        </select>
-                    </div>
+        // Vue par défaut (France)
+        var map = L.map('map').setView([46.603354, 1.888334], 5);
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Niveau Requis</label>
-                        <select name="niveau" class="form-select bg-light border-0">
-                            <option value="1">1 - Débutant (Nice to have)</option>
-                            <option value="2">2 - Intermédiaire</option>
-                            <option value="3">3 - Confirmé (Standard)</option>
-                            <option value="4">4 - Avancé (Important)</option>
-                            <option value="5">5 - Expert (Critique)</option>
-                        </select>
-                        <div class="form-text small">Plus le niveau est élevé, plus l'impact sur le score sera fort.</div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary-gradient px-4 rounded-pill fw-bold">Ajouter</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        if(ville) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        var lat = data[0].lat;
+                        var lon = data[0].lon;
+                        map.setView([lat, lon], 13);
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup(`<b>${ville}</b><br>Poste basé ici`)
+                            .openPopup();
+                    }
+                })
+                .catch(err => console.error("Erreur géocodage:", err));
+        }
+    });
+</script>

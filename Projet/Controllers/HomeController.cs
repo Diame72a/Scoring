@@ -22,12 +22,12 @@ namespace Projet.Controllers
         {
             var stats = new HomeDashboardViewModel();
 
-            // 1. Les KPIs de base
+            
             stats.NbOffres = _context.Offres.Count();
             stats.NbCandidats = _context.Personnes.Count();
             stats.NbCompetences = _context.Competences.Count();
 
-            // 2. Graphique 1 : Offres par Métier
+            
             var offresParPoste = _context.Offres
                 .Include(o => o.Poste)
                 .GroupBy(o => o.Poste.Intitule)
@@ -40,8 +40,7 @@ namespace Projet.Controllers
                 stats.DataMetiers.Add(item.Nombre);
             }
 
-            // 3. Graphique 2 : Candidats par Expérience (NOUVEAU)
-            // On récupère tout le monde (optimisation possible en SQL direct, mais ok pour <1000 items)
+            
             var candidats = _context.Personnes.ToList();
 
             int junior = candidats.Count(p => p.AnneesExperienceTotal < 2);
@@ -50,7 +49,7 @@ namespace Projet.Controllers
 
             stats.DataExperience = new List<int> { junior, confirme, senior };
 
-            // 4. Flux d'Activités (Mixte Offres + Candidats)
+            
             var dernieresOffres = _context.Offres
                 .OrderByDescending(o => o.Id)
                 .Take(3)

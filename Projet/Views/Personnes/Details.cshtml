@@ -5,29 +5,29 @@
     ViewData["Title"] = "Profil Candidat";
 }
 
-<div class="container py-5">
-    <!-- Fil d'ariane -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Candidats</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.Prenom @Model.Nom</li>
-        </ol>
-    </nav>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="container-fluid py-4">
+
+    <div class="mb-4">
+        <a asp-action="Index" class="text-decoration-none text-muted small fw-bold">
+            <i class="fas fa-arrow-left me-1"></i> Retour au vivier
+        </a>
+    </div>
 
     <div class="row g-4">
-        <!-- COLONNE GAUCHE : IDENTITÉ (Design Pro) -->
+
         <div class="col-lg-4">
-            <div class="card shadow border-0 text-center h-100">
-                <div class="card-body p-5">
-                    <!-- Avatar -->
-                    <div class="mx-auto bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mb-4 shadow-sm"
-                         style="width: 120px; height: 120px; font-size: 3rem; font-weight: bold; border: 4px solid white;">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden h-100 text-center">
+                <div class="card-body p-5 d-flex flex-column align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-4 shadow-sm text-white"
+                         style="width: 120px; height: 120px; font-size: 3rem; font-weight: bold; background: linear-gradient(135deg, #2af598 0%, #009efd 100%); border: 5px solid #fff;">
                         @Model.Prenom.Substring(0, 1)@Model.Nom.Substring(0, 1)
                     </div>
-
                     <h3 class="fw-bold mb-1">@Model.Prenom @Model.Nom</h3>
+                    <p class="text-muted mb-3"><i class="fas fa-map-marker-alt me-1 text-danger"></i> @Model.Ville</p>
 
-                    <!-- Badge Niveau Expérience -->
                     <div class="mb-4">
                         @if (Model.AnneesExperienceTotal >= 5)
                         {
@@ -35,76 +35,58 @@
                         }
                         else if (Model.AnneesExperienceTotal >= 2)
                         {
+
                             <span class="badge bg-info text-white rounded-pill px-3">CONFIRMÉ</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary rounded-pill px-3">JUNIOR</span>
+
+                            <span class="badge bg-light text-secondary border rounded-pill px-3">JUNIOR</span>
                         }
                     </div>
 
-                    <!-- Actions -->
-                    <div class="d-grid gap-2">
+                    <div class="d-grid gap-2 w-100 mt-auto">
                         <a href="mailto:@Model.Email" class="btn btn-primary-gradient shadow-sm"><i class="far fa-envelope me-2"></i>Contacter</a>
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Modifier profil</a>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-light border">Modifier</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- COLONNE DROITE : DÉTAILS & COMPÉTENCES -->
         <div class="col-lg-8">
-            <div class="card shadow border-0 h-100">
-                <div class="card-header bg-white fw-bold py-3">Informations détaillées</div>
+            <div class="card border-0 shadow-lg rounded-4 h-100">
+                <div class="card-header bg-white py-3 px-4 border-bottom">
+                    <h6 class="mb-0 fw-bold text-muted text-uppercase small">Dossier complet</h6>
+                </div>
                 <div class="card-body p-4">
 
-                    <!-- BLOC INFOS GÉNÉRALES -->
-                    <div class="row g-4 mb-5">
+                    <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-map-marker-alt fa-lg"></i></div>
-                                <div>
-                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Localisation</small>
-                                    <span class="fw-bold">@Model.Ville (@Model.CodePostal)</span>
-                                </div>
-                            </div>
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size:0.7rem">Email</small>
+                            <span class="fw-bold text-dark">@Model.Email</span>
                         </div>
                         <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-birthday-cake fa-lg"></i></div>
-                                <div>
-                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Âge</small>
-                                    <span class="fw-bold">@(DateTime.Now.Year - Model.DateNaissance.Year) ans</span>
-                                    <span class="text-muted small">(@Model.DateNaissance.ToShortDateString())</span>
-                                </div>
-                            </div>
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size:0.7rem">Âge</small>
+                            <span class="fw-bold text-dark">@(DateTime.Now.Year - Model.DateNaissance.Year) ans</span>
                         </div>
                         <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-chart-line fa-lg"></i></div>
-                                <div>
-                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Expérience Totale</small>
-                                    <span class="fw-bold">@Model.AnneesExperienceTotal ans</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-light p-3 rounded me-3 text-secondary"><i class="fas fa-at fa-lg"></i></div>
-                                <div>
-                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Email</small>
-                                    <span class="fw-bold text-break">@Model.Email</span>
-                                </div>
-                            </div>
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size:0.7rem">Expérience</small>
+                            <span class="fw-bold text-dark">@Model.AnneesExperienceTotal ans</span>
                         </div>
                     </div>
 
-                    <!-- BLOC COMPÉTENCES DYNAMIQUE -->
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                        <h6 class="text-muted text-uppercase fw-bold small mb-0">Compétences Techniques</h6>
-                        <!-- Bouton déclencheur de la modale -->
-                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold shadow-sm border" data-bs-toggle="modal" data-bs-target="#modalAddSkill">
-                            <i class="fas fa-plus-circle me-1"></i> Ajouter
+                    <div class="mb-5 rounded-3 overflow-hidden border shadow-sm position-relative">
+                        <div id="map" style="height: 200px; width: 100%; z-index: 1;"></div>
+                        <div class="position-absolute top-0 start-0 bg-white px-2 py-1 m-2 rounded shadow-sm small fw-bold" style="z-index: 999;">
+                            <i class="fas fa-home text-primary me-1"></i> Domicile
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+                        <h6 class="text-primary fw-bold mb-0"><i class="fas fa-layer-group me-2"></i>Stack Technique</h6>
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold border rounded-pill px-3"
+                                data-bs-toggle="modal" data-bs-target="#modalAddSkill">
+                            <i class="fas fa-plus me-1"></i> Ajouter
                         </button>
                     </div>
 
@@ -114,30 +96,24 @@
                             @foreach (var item in ((IEnumerable<Projet.Models.CompetenceAcquise>)Model.CompetenceAcquises).OrderByDescending(x => x.Niveau))
                             {
                                 <div class="col-md-6">
-                                    <div class="p-3 bg-white border rounded shadow-sm position-relative">
+                                    <div class="p-3 bg-light border-0 rounded-3 position-relative h-100">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <span class="fw-bold text-dark">@item.Competence?.Nom</span>
-
-                                            <!-- Bouton Supprimer -->
                                             <form asp-action="SupprimerCompetence" method="post" class="d-inline">
                                                 <input type="hidden" name="id" value="@item.Id" />
-                                                <button type="submit" class="btn btn-link text-danger p-0 small" title="Retirer" onclick="return confirm('Retirer cette compétence ?');">
+                                                <button type="submit" class="btn btn-link text-muted p-0 small hover-red" onclick="return confirm('Retirer ?');">
                                                     <i class="fas fa-times"></i>
                                                 </button>
                                             </form>
                                         </div>
-
-                                        <!-- Jauge de Niveau -->
-                                        <div class="d-flex align-items-center">
-                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
-                                                @{
-                                                    var width = item.Niveau * 20;
-                                                    var color = item.Niveau >= 4 ? "bg-success" : (item.Niveau >= 3 ? "bg-info" : "bg-warning");
-                                                }
-                                                <div class="progress-bar @color" role="progressbar" style="width: @width%"></div>
-                                            </div>
-                                            <span class="small fw-bold text-muted">@item.Niveau/5</span>
+                                        <div class="progress" style="height: 6px;">
+                                            @{
+                                                var w = item.Niveau * 20;
+                                                var c = item.Niveau >= 4 ? "bg-success" : (item.Niveau >= 3 ? "bg-info" : "bg-warning");
+                                            }
+                                            <div class="progress-bar @c" role="progressbar" style="width: @w%"></div>
                                         </div>
+                                        <div class="text-end mt-1"><small class="text-muted" style="font-size: 0.7rem">Niveau @item.Niveau/5</small></div>
                                     </div>
                                 </div>
                             }
@@ -145,11 +121,8 @@
                     }
                     else
                     {
-                        <!-- État vide -->
-                        <div class="p-4 bg-light rounded text-center text-muted border border-dashed">
-                            <i class="fas fa-code fa-2x mb-2 text-secondary opacity-50"></i>
-                            <p class="mb-0 small">Aucune compétence associée à ce profil.</p>
-                            <button class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalAddSkill">En ajouter une maintenant</button>
+                        <div class="text-center py-4 border border-dashed rounded-3 text-muted">
+                            <p class="mb-0 small">Aucune compétence technique renseignée.</p>
                         </div>
                     }
 
@@ -159,19 +132,16 @@
     </div>
 </div>
 
-<!-- --- MODALE D'AJOUT DE COMPÉTENCE --- -->
 <div class="modal fade" id="modalAddSkill" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold"><i class="fas fa-plus me-2"></i>Nouvelle Compétence</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header text-white border-0" style="background: linear-gradient(135deg, #2af598 0%, #009efd 100%);">
+                <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2"></i>Nouvelle Compétence</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
             <form asp-action="AjouterCompetence" method="post">
                 <div class="modal-body p-4">
                     <input type="hidden" name="personneId" value="@Model.Id" />
-
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-uppercase">Compétence</label>
                         <select name="competenceId" class="form-select form-select-lg">
@@ -183,17 +153,15 @@
                                 }
                             }
                         </select>
-                        <div class="form-text">Liste issue du catalogue global.</div>
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-uppercase">Niveau de maîtrise</label>
+                        <label class="form-label fw-bold small text-uppercase">Niveau</label>
                         <select name="niveau" class="form-select">
-                            <option value="1">1 - Débutant (Notions)</option>
-                            <option value="2">2 - Intermédiaire (Autonome)</option>
-                            <option value="3">3 - Confirmé (Opérationnel)</option>
-                            <option value="4">4 - Avancé (Maîtrise)</option>
-                            <option value="5">5 - Expert (Référence)</option>
+                            <option value="1">1 - Débutant</option>
+                            <option value="2">2 - Intermédiaire</option>
+                            <option value="3">3 - Confirmé</option>
+                            <option value="4">4 - Avancé</option>
+                            <option value="5">5 - Expert</option>
                         </select>
                     </div>
                 </div>
@@ -205,3 +173,37 @@
         </div>
     </div>
 </div>
+
+<style>
+    .hover-red:hover {
+        color: #dc3545 !important;
+    }</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var ville = "@Html.Raw(Model.Ville)";
+        var cp = "@Html.Raw(Model.CodePostal)";
+        var query = ville + " " + cp + " France";
+
+        var map = L.map('map').setView([46.603354, 1.888334], 5); // Vue France
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        if(ville) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        var lat = data[0].lat;
+                        var lon = data[0].lon;
+                        map.setView([lat, lon], 13);
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup(`<b>${ville}</b><br>Domicile candidat`)
+                            .openPopup();
+                    }
+                });
+        }
+    });
+</script>
