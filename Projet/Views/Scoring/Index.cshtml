@@ -5,105 +5,101 @@
 }
 
 <div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
 
-    <div class="card border-0 shadow-lg overflow-hidden rounded-4" style="min-height: 500px;">
-        <div class="row g-0 h-100">
-
-            <div class="col-lg-5 text-white d-flex flex-column justify-content-center p-5"
-                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-
-                <div class="mb-4">
-                    <div class="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
-                        <i class="fas fa-robot fa-2x text-white"></i>
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header border-0 py-5 text-center text-white"
+                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="mb-3">
+                        <i class="fas fa-robot fa-4x text-white opacity-75"></i>
                     </div>
+                    <h2 class="fw-bold mb-1">Matching Intelligent</h2>
+                    <p class="mb-0 opacity-75 font-monospace small">Algorithme de Scoring V1.0</p>
                 </div>
 
-                <h2 class="fw-bold mb-3">NexaScore™</h2>
-                <p class="lead mb-4 opacity-75">
-                    Notre algorithme analyse vos candidats en temps réel pour identifier les meilleurs profils.
-                </p>
+                <div class="card-body p-5">
 
-                <ul class="list-unstyled opacity-75 small">
-                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i>Analyse sémantique des compétences</li>
-                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i>Calcul de l'expérience réelle</li>
-                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i>Géo-localisation intelligente</li>
-                </ul>
+                    @if (Model.Any())
+                    {
+                        <div class="text-center mb-4">
+                            <p class="text-muted">
+                                Sélectionnez une offre d'emploi ci-dessous. Notre algorithme va analyser votre base de candidats pour trouver les meilleures correspondances.
+                            </p>
+                        </div>
 
-                <div class="mt-auto pt-5">
-                    <small class="text-white-50">Version 1.0.2 • Moteur Déterministe</small>
-                </div>
-            </div>
-
-            <div class="col-lg-7 bg-white p-5 d-flex flex-column justify-content-center">
-
-                <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h4 class="fw-bold text-dark mb-0">Configurer l'analyse</h4>
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-light btn-sm rounded-pill px-3 text-muted">
-                        <i class="fas fa-times me-1"></i> Fermer
-                    </a>
-                </div>
-
-                @if (Model.Any())
-                {
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-uppercase small text-muted mb-2">Offre Cible</label>
-                        <div class="input-group input-group-lg shadow-sm">
-                            <span class="input-group-text bg-white border-end-0 text-primary ps-3">
-                                <i class="fas fa-briefcase"></i>
-                            </span>
-                            <select id="offerSelect" class="form-select border-start-0 ps-2" onchange="updateLaunchButton()" style="cursor: pointer;">
-                                <option selected disabled value="">-- Sélectionner un poste --</option>
+                        <div class="form-floating mb-4">
+                            <select id="offerSelect" class="form-select form-select-lg" onchange="updateLaunchButton()">
+                                <option selected disabled value="">-- Choisir une offre --</option>
                                 @foreach (var offre in Model)
                                 {
                                     <option value="@offre.Id">@offre.Titre (@offre.Poste?.Intitule)</option>
                                 }
                             </select>
+                            <label for="offerSelect">Offre à analyser</label>
                         </div>
-                        <div class="form-text mt-2">
-                            L'algorithme comparera cette offre avec les @ViewBag.NbCandidats candidats de la base.
+
+                        <div class="d-grid">
+                            <a id="btnLaunch" href="#" class="btn btn-primary-gradient btn-lg py-3 disabled shadow-sm">
+                                <span id="btnText">Sélectionnez une offre...</span>
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
                         </div>
-                    </div>
 
-                    <div class="d-grid mt-4">
-                        <a id="btnLaunch" href="#" class="btn btn-primary-gradient btn-lg py-3 disabled shadow-md transition-all">
-                            <span id="btnText" class="fw-bold">Commencer le matching</span>
-                            <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-5">
-                        <div class="text-warning mb-3"><i class="fas fa-exclamation-circle fa-3x"></i></div>
-                        <h5>Aucune offre disponible</h5>
-                        <p class="text-muted mb-4">Vous devez créer une offre avant de pouvoir la matcher.</p>
-                        <a asp-controller="Offres" asp-action="Create" class="btn btn-outline-primary">Créer une offre</a>
-                    </div>
-                }
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Le calcul prend en compte les compétences, l'expérience et la localisation.
+                            </small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <div class="text-warning mb-3"><i class="fas fa-exclamation-triangle fa-3x"></i></div>
+                            <h4 class="fw-bold text-dark">Aucune offre disponible</h4>
+                            <p class="text-muted mb-4">Vous devez créer au moins une offre d'emploi avant de lancer un matching.</p>
+                            <a asp-controller="Offres" asp-action="Create" class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="fas fa-plus me-2"></i>Créer une offre maintenant
+                            </a>
+                        </div>
+                    }
 
+                </div>
+
+                <div class="card-footer bg-light border-0 text-center py-3">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small fw-bold">
+                        <i class="fas fa-times me-1"></i> Annuler et retour Dashboard
+                    </a>
+                </div>
             </div>
+
         </div>
     </div>
 </div>
 
 <script>
     function updateLaunchButton() {
+        // 1. On récupère l'ID de l'offre choisie
         var selectBox = document.getElementById("offerSelect");
         var selectedId = selectBox.value;
+
+        // 2. On cible le bouton et le texte
         var btn = document.getElementById("btnLaunch");
         var btnText = document.getElementById("btnText");
 
         if (selectedId) {
+            // 3. Si une offre est choisie, on active le bouton et on construit l'URL
+            // L'URL devient : /Scoring/Calculer/5
             btn.href = "/Scoring/Calculer/" + selectedId;
+
+            // On change le style pour montrer que c'est prêt
             btn.classList.remove("disabled");
             btnText.innerText = "Lancer l'analyse maintenant";
-
-            // Petit effet visuel
-            btn.classList.add("shadow-lg");
         } else {
+            // Sinon on désactive
             btn.classList.add("disabled");
-            btnText.innerText = "Commencer le matching";
-            btn.classList.remove("shadow-lg");
+            btnText.innerText = "Sélectionnez une offre...";
         }
     }
 </script>

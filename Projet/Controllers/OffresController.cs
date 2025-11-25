@@ -60,118 +60,69 @@ namespace Projet.Controllers
             return View(offres);
         }
 
-        
+        // GET: Offres/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
 
             var offre = await _context.Offres
                 .Include(o => o.Poste)
-                .Include(o => o.CompetenceSouhaitees) 
-                    .ThenInclude(cs => cs.Competence) 
                 .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (offre == null) return NotFound();
-
-            
-            ViewBag.CompetencesDispos = _context.Competences.OrderBy(c => c.Nom).ToList();
+            if (offre == null)
+            {
+                return NotFound();
+            }
 
             return View(offre);
-        }
-
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AjouterCompetence(int offreId, int competenceId, int niveau)
-        {
-            
-            var existe = await _context.CompetenceSouhaitees
-                .AnyAsync(cs => cs.OffreId == offreId && cs.CompetenceId == competenceId);
-
-            if (!existe)
-            {
-                var nouvelleExigence = new CompetenceSouhaitee
-                {
-                    OffreId = offreId,
-                    CompetenceId = competenceId,
-                    NiveauRequis = niveau
-                };
-                _context.Add(nouvelleExigence);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(nameof(Details), new { id = offreId });
-        }
-
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SupprimerCompetence(int id)
-        {
-            var liaison = await _context.CompetenceSouhaitees.FindAsync(id);
-            if (liaison != null)
-            {
-                int offreId = liaison.OffreId; 
-                _context.CompetenceSouhaitees.Remove(liaison);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Edit), new { id = offreId });
-            }
-            return RedirectToAction(nameof(Index));
         }
 
         // GET: Offres/Create
         public IActionResult Create()
         {
-            
-            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Intitule");
+            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Id");
             return View();
         }
 
-
+        // POST: Offres/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Titre,Description,VilleCible,CodePostalCible,PosteId")] Offre offre)
+        public async Task<IActionResult> Create([Bind("Id,Titre,Description,DateCreation,VilleCible,CodePostalCible,PosteId")] Offre offre)
         {
-            offre.DateCreation = DateTime.Now;
-            ModelState.Remove("Poste");
-
             if (ModelState.IsValid)
             {
                 _context.Add(offre);
                 await _context.SaveChangesAsync();
-
-                
-                TempData["SuccessMessage"] = "Offre créée ! Définissez maintenant les compétences requises.";
-                return RedirectToAction(nameof(Edit), new { id = offre.Id });
+                return RedirectToAction(nameof(Index));
             }
-
-            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Intitule", offre.PosteId);
+            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Id", offre.PosteId);
             return View(offre);
         }
 
-
+        // GET: Offres/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            
-            var offre = await _context.Offres
-                .Include(o => o.CompetenceSouhaitees)
-                    .ThenInclude(cs => cs.Competence)
-                .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (offre == null) return NotFound();
-
-            
-            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Intitule", offre.PosteId);
-
-            
-            ViewBag.CompetencesDispos = _context.Competences.OrderBy(c => c.Nom).ToList();
-
+            var offre = await _context.Offres.FindAsync(id);
+            if (offre == null)
+            {
+                return NotFound();
+            }
+            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Id", offre.PosteId);
             return View(offre);
         }
 
-        
+        // POST: Offres/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Titre,Description,DateCreation,VilleCible,CodePostalCible,PosteId")] Offre offre)
@@ -180,9 +131,6 @@ namespace Projet.Controllers
             {
                 return NotFound();
             }
-
-            
-            ModelState.Remove("Poste");
 
             if (ModelState.IsValid)
             {
@@ -204,19 +152,7 @@ namespace Projet.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-
-            
-            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Intitule", offre.PosteId);
-
-            
-            var offreComplete = await _context.Offres
-                .Include(o => o.CompetenceSouhaitees).ThenInclude(cs => cs.Competence)
-                .FirstOrDefaultAsync(o => o.Id == id);
-
-            
-            if (offreComplete != null) offre.CompetenceSouhaitees = offreComplete.CompetenceSouhaitees;
-            ViewBag.CompetencesDispos = _context.Competences.OrderBy(c => c.Nom).ToList();
-
+            ViewData["PosteId"] = new SelectList(_context.Postes, "Id", "Id", offre.PosteId);
             return View(offre);
         }
 
@@ -252,68 +188,6 @@ namespace Projet.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> AjouterPlusieurs(int id)
-        {
-            var offre = await _context.Offres
-                .Include(o => o.CompetenceSouhaitees)
-                .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (offre == null) return NotFound();
-
-            
-            var idsExistants = offre.CompetenceSouhaitees.Select(c => c.CompetenceId).ToList();
-
-            
-            var competencesDispo = await _context.Competences
-                .Where(c => !idsExistants.Contains(c.Id))
-                .OrderBy(c => c.Nom)
-                .ToListAsync();
-
-            var model = new OffreBulkCompetenceViewModel
-            {
-                OffreId = id,
-                Competences = competencesDispo.Select(c => new CompetenceSelectionItem
-                {
-                    CompetenceId = c.Id,
-                    Nom = c.Nom,
-                    EstSelectionne = false,
-                    NiveauRequis = 3 
-                }).ToList()
-            };
-
-            
-            return PartialView("_AjoutMultiplePartial", model);
-        }
-
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AjouterPlusieurs(OffreBulkCompetenceViewModel model)
-        {
-            
-            var aAjouter = model.Competences.Where(c => c.EstSelectionne).ToList();
-
-            if (aAjouter.Any())
-            {
-                foreach (var item in aAjouter)
-                {
-                    var nouvelleLiaison = new CompetenceSouhaitee
-                    {
-                        OffreId = model.OffreId,
-                        CompetenceId = item.CompetenceId,
-                        NiveauRequis = item.NiveauRequis
-                    };
-                    _context.Add(nouvelleLiaison);
-                }
-                await _context.SaveChangesAsync();
-            }
-
-            
-            return RedirectToAction(nameof(Edit), new { id = model.OffreId });
         }
 
         private bool OffreExists(int id)

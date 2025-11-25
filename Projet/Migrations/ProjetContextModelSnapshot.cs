@@ -222,9 +222,6 @@ namespace Projet.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Telephone")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Ville")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");

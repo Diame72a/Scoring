@@ -1,5 +1,5 @@
-﻿
-
+﻿USE MonProjetL3_DB;
+GO
 
 PRINT '--- DÉBUT DU SCRIPT DE PEUPLEMENT MASSIF ---';
 
